@@ -351,17 +351,25 @@ class Editor:
 
     def kodu_calistir(self):
         sekme = self.guncel_sekme()
-        if not sekme or not sekme.dosya_yolu: return
+        if not sekme: return
+        
         self.dosya_kaydet()
+        if not sekme.dosya_yolu: return 
+        
         yol = sekme.dosya_yolu
         if yol.endswith(".py"):
-            komut = f"bash -c 'python3 \"{yol}\"; echo; read -p \"Bitti...\"'"
+            komut = f'python3 "{yol}"; echo; read -p "Bitti. Kapatmak için Enter..."'
         elif yol.endswith((".c", ".cpp")):
             output = yol.replace(".cpp", "").replace(".c", "")
-            komut = f"bash -c 'g++ \"{yol}\" -o \"{output}\" && \"./{output}\"; echo; read -p \"Bitti...\"'"
-        else: return
-        subprocess.Popen(['x-terminal-emulator', '-e', komut], stderr=subprocess.DEVNULL)
+            komut = f'g++ "{yol}" -o "{output}" && "./{output}"; echo; read -p "Bitti. Kapatmak için Enter..."'
+        else:
+            return
 
+        subprocess.Popen(
+            ['x-terminal-emulator', '-e', 'bash', '-c', komut],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL
+        )
 if __name__ == "__main__":
     # KRİTİK DEĞİŞİKLİK: Alt+Tab desteği (WM_CLASS) burada ana pencere yaratılırken verilir.
     root = tk.Tk(className="artvineditor")
